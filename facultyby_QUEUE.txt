@@ -1,0 +1,170 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <list>
+
+using namespace std;
+
+class Faculty {
+public:
+    int id;
+    string name;
+    string department;
+    string position;
+    int salary;
+
+    Faculty(int id, string name, string department, string position, int salary) {
+        this->id = id;
+        this->name = name;
+        this->department = department;
+        this->position = position;
+        this->salary = salary;
+    }
+};
+
+class FacultyHashTable {
+private:
+    vector<list<Faculty>> table;
+    int size;
+
+    // Hash function to map faculty ID to an index in the hash table
+    int hashFunction(int id) {
+        return id % size;
+    }
+
+public:
+    FacultyHashTable(int size) {
+        this->size = size;
+        table.resize(size);
+    }
+
+    // Function to insert a new faculty member
+    void insertFaculty(Faculty faculty) {
+        int index = hashFunction(faculty.id);
+        table[index].push_back(faculty);
+        cout << "Faculty member added successfully!" << endl;
+    }
+
+    // Function to search for a faculty member by ID
+    Faculty* searchFaculty(int id) {
+        int index = hashFunction(id);
+        for (auto& f : table[index]) {
+            if (f.id == id) {
+                return &f;
+            }
+        }
+        return nullptr;
+    }
+
+    // Function to display all faculty members
+    void displayAllFaculty() {
+        bool found = false;
+        for (int i = 0; i < size; i++) {
+            if (!table[i].empty()) {
+                for (auto& f : table[i]) {
+                    cout << "ID: " << f.id << ", Name: " << f.name
+                         << ", Department: " << f.department
+                         << ", Position: " << f.position
+                         << ", Salary: " << f.salary << endl;
+                    found = true;
+                }
+            }
+        }
+        if (!found) {
+            cout << "No faculty members found!" << endl;
+        }
+    }
+
+    // Function to delete a faculty member by ID
+    void deleteFaculty(int id) {
+        int index = hashFunction(id);
+        auto& list = table[index];
+        for (auto it = list.begin(); it != list.end(); ++it) {
+            if (it->id == id) {
+                list.erase(it);
+                cout << "Faculty with ID " << id << " has been deleted." << endl;
+                return;
+            }
+        }
+        cout << "Faculty with ID " << id << " not found." << endl;
+    }
+};
+
+int main() {
+    int tableSize;
+    cout << "Enter the size of the hash table: ";
+    cin >> tableSize;
+
+    FacultyHashTable fht(tableSize);
+
+    int choice;
+
+    do {
+        cout << "\nFaculty Recruitment and Management System\n";
+        cout << "1. Add Faculty\n";
+        cout << "2. Search Faculty by ID\n";
+        cout << "3. Display All Faculty\n";
+        cout << "4. Delete Faculty by ID\n";
+        cout << "5. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                int id, salary;
+                string name, department, position;
+
+                cout << "\nEnter Faculty ID: ";
+                cin >> id;
+                cin.ignore();  // To ignore newline character from previous input
+                cout << "Enter Faculty Name: ";
+                getline(cin, name);
+                cout << "Enter Faculty Department: ";
+                getline(cin, department);
+                cout << "Enter Faculty Position: ";
+                getline(cin, position);
+                cout << "Enter Faculty Salary: ";
+                cin >> salary;
+
+                Faculty newFaculty(id, name, department, position, salary);
+                fht.insertFaculty(newFaculty);
+                break;
+            }
+            case 2: {
+                int id;
+                cout << "\nEnter Faculty ID to search: ";
+                cin >> id;
+
+                Faculty* faculty = fht.searchFaculty(id);
+                if (faculty != nullptr) {
+                    cout << "\nFaculty Found:\n";
+                    cout << "ID: " << faculty->id << ", Name: " << faculty->name
+                         << ", Department: " << faculty->department
+                         << ", Position: " << faculty->position
+                         << ", Salary: " << faculty->salary << endl;
+                } else {
+                    cout << "Faculty with ID " << id << " not found." << endl;
+                }
+                break;
+            }
+            case 3:
+                cout << "\nDisplaying all faculty members:\n";
+                fht.displayAllFaculty();
+                break;
+            case 4: {
+                int id;
+                cout << "\nEnter Faculty ID to delete: ";
+                cin >> id;
+                fht.deleteFaculty(id);
+                break;
+            }
+            case 5:
+                cout << "Exiting the program...\n";
+                break;
+            default:
+                cout << "Invalid choice! Please try again.\n";
+        }
+    } while (choice != 5);
+
+    return 0;
+}
